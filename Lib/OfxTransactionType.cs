@@ -38,6 +38,8 @@ namespace OfxSharpLib
         REPEATPMT,
         OTHER,
         IN,
-        OUT, 
+        OUT,
+        Invoice, //Iugu Credit
+        WithdrawRequest //Iugu Debit
     }
 }
