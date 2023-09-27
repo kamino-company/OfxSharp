@@ -107,13 +107,14 @@ namespace OfxSharpLib
         }
 
         /// <summary>
-        /// Returns TransactionType from string version
+        /// Returns TransactionType from string version, if not found returns Unknown some banks use different transaction types no mapped here
         /// </summary>
         /// <param name="transactionType">string version of transaction type</param>
         /// <returns>Enum version of given transaction type string</returns>
         private OfxTransactionType GetTransactionType(string transactionType)
         {
-         return (OfxTransactionType) Enum.Parse(typeof (OfxTransactionType), transactionType);
+            Enum.TryParse(transactionType, out OfxTransactionType type);
+            return type;
         }
 
         /// <summary>
