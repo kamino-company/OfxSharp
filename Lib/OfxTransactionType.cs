@@ -4,6 +4,8 @@ namespace OfxSharpLib
 {
     public enum OfxTransactionType
     {
+        [Description("Unknown type")]
+        Unknown,
         [Description("Basic Credit")]
         CREDIT,
         [Description("Basic Debit")]
