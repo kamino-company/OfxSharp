@@ -195,17 +195,14 @@ namespace OfxSharpLib
 
         private string FixSgmlClosingTags(string ofxContent)
         {
-            var pattern = @"<(?<tag>\w+?)>(?<content>[^<]*)";
-            var regex = new Regex(pattern);
-            var matches = regex.Matches(ofxContent);
-
+            var regex = new Regex(@"<(?<tag>\w+?)>(?<content>[^<]*)");
+            
             var fixedContent = new StringBuilder();
             int lastIndex = 0;
 
-            foreach (Match match in matches)
+            foreach (Match match in regex.Matches(ofxContent))
             {
-                fixedContent.Append(ofxContent.Substring(lastIndex, match.Index - lastIndex));
-
+                fixedContent.Append(ofxContent, lastIndex, match.Index - lastIndex);
                 var tagName = match.Groups["tag"].Value;
                 var content = match.Groups["content"].Value.Trim();
 
@@ -220,7 +217,6 @@ namespace OfxSharpLib
             }
 
             fixedContent.Append(ofxContent.Substring(lastIndex));
-
             return fixedContent.ToString();
         }
 
