@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Sgml;
 
@@ -192,6 +193,37 @@ namespace OfxSharpLib
             return (file.IndexOf("OFXHEADER:100", StringComparison.Ordinal) == -1);
         }
 
+        private string FixSgmlClosingTags(string ofxContent)
+        {
+            var pattern = @"<(?<tag>\w+?)>(?<content>[^<]*)";
+            var regex = new Regex(pattern);
+            var matches = regex.Matches(ofxContent);
+
+            var fixedContent = new StringBuilder();
+            int lastIndex = 0;
+
+            foreach (Match match in matches)
+            {
+                fixedContent.Append(ofxContent.Substring(lastIndex, match.Index - lastIndex));
+
+                var tagName = match.Groups["tag"].Value;
+                var content = match.Groups["content"].Value.Trim();
+
+                fixedContent.Append(match.Value);
+                
+                if (!string.IsNullOrEmpty(content) && !content.StartsWith("<"))
+                {
+                    fixedContent.Append($"</{tagName}>");
+                }
+
+                lastIndex = match.Index + match.Length;
+            }
+
+            fixedContent.Append(ofxContent.Substring(lastIndex));
+
+            return fixedContent.ToString();
+        }
+
         /// <summary>
         /// Converts SGML to XML
         /// </summary>
@@ -199,10 +231,11 @@ namespace OfxSharpLib
         /// <returns>OFX File in XML format</returns>
         private string SgmltoXml(string file)
         {
+            var ofxFile = FixSgmlClosingTags(file);
             var reader = new SgmlReader
             {
-                InputStream = new StringReader(ParseHeader(file)),
-                DocType = "OFX"
+                InputStream = new StringReader(ParseHeader(ofxFile)),
+                DocType = "OFX",
             };
 
             var sw = new StringWriter();
