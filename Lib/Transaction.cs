@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Xml;
 
 namespace OfxSharpLib
@@ -53,7 +54,7 @@ namespace OfxSharpLib
 
             try
             {
-                Amount = Convert.ToDecimal(node.GetValue("//TRNAMT").Replace(",", "."), CultureInfo.InvariantCulture);
+                Amount = ParseAmount(node.GetValue("//TRNAMT"));
 
                 if (TransType == OfxTransactionType.DEBIT && Amount > 0)
                     Amount *= -1;
@@ -104,6 +105,30 @@ namespace OfxSharpLib
                 TransactionSenderAccount = new Account(node.SelectSingleNode("//BANKACCTTO"), AccountType.Bank);
             else if (NodeExists(node, "//CCACCTTO"))
                 TransactionSenderAccount = new Account(node.SelectSingleNode("//CCACCTTO"), AccountType.Cc);
+        }
+
+        // Parses TRNAMT supporting US ("1234.56", "1,234.56") and BR ("1234,56", "1.234,56", "6000.000,00") number formats.
+        // Brazilian banks (notably Santander) serialize amounts >= R$ 1,000,000 using '.' as thousand separator and ',' as decimal.
+        internal static decimal ParseAmount(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                throw new FormatException("Empty TRNAMT");
+
+            var s = raw.Trim();
+            string normalized;
+
+            if (s.IndexOf(',') >= 0)
+            {
+                // Brazilian format: ',' is the decimal separator and '.' is the thousand separator.
+                normalized = s.Replace(".", string.Empty).Replace(",", ".");
+            }
+            else
+            {
+                // US format: '.' is the decimal separator. Multiple dots means the dots are thousand separators.
+                normalized = s.Count(c => c == '.') > 1 ? s.Replace(".", string.Empty) : s;
+            }
+
+            return decimal.Parse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture);
         }
 
         /// <summary>

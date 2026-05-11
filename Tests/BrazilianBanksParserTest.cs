@@ -31,6 +31,26 @@ namespace OFXSharp.Tests
             Assert.IsNotNull(ofxDocument);
         }
 
+        // Regression: Santander serializes amounts >= R$ 1,000,000 using '.' as thousand separator
+        // and ',' as decimal (e.g. "6000.000,00"). The original parser did a naive Replace(",", ".")
+        // which produced three dots and threw FormatException, breaking OFX import for affected clients.
+        // See N3-5888.
+        [Test]
+        public void CanParseSantanderWithThousandsSeparator()
+        {
+            var parser = new OfxDocumentParser();
+            var ofxDocument = parser.Import(new FileStream(@"santander-thousands-separator.ofx", FileMode.Open));
+
+            Assert.IsNotNull(ofxDocument);
+            Assert.AreEqual(4, ofxDocument.Transactions.Count());
+
+            var transactions = ofxDocument.Transactions.ToList();
+            Assert.AreEqual(-2.48m, transactions[0].Amount);
+            Assert.AreEqual(6000000m, transactions[1].Amount);
+            Assert.AreEqual(-5800000m, transactions[2].Amount);
+            Assert.AreEqual(-152541.14m, transactions[3].Amount);
+        }
+
         [Test]
         public void CanParseBancoDoBrasil()
         {
