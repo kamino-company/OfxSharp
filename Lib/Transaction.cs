@@ -53,7 +53,7 @@ namespace OfxSharpLib
 
             try
             {
-                Amount = Convert.ToDecimal(node.GetValue("//TRNAMT").Replace(",", "."), CultureInfo.InvariantCulture);
+                Amount = ParseAmount(node.GetValue("//TRNAMT"));
 
                 if (TransType == OfxTransactionType.DEBIT && Amount > 0)
                     Amount *= -1;
@@ -104,6 +104,37 @@ namespace OfxSharpLib
                 TransactionSenderAccount = new Account(node.SelectSingleNode("//BANKACCTTO"), AccountType.Bank);
             else if (NodeExists(node, "//CCACCTTO"))
                 TransactionSenderAccount = new Account(node.SelectSingleNode("//CCACCTTO"), AccountType.Cc);
+        }
+
+        // Parses TRNAMT supporting US ("1234.56", "1,234.56") and BR ("1234,56", "1.234,56", "6000.000,00") number formats.
+        // Brazilian banks (notably Santander) serialize amounts >= R$ 1,000,000 using '.' as thousand separator and ',' as decimal.
+        // Rule: whichever of '.' or ',' appears last is the decimal separator; the other (if any) is the thousand separator.
+        internal static decimal ParseAmount(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                throw new FormatException("Empty TRNAMT");
+
+            var s = raw.Trim();
+            var lastDot = s.LastIndexOf('.');
+            var lastComma = s.LastIndexOf(',');
+
+            string normalized;
+            if (lastDot < 0 && lastComma < 0)
+            {
+                normalized = s;
+            }
+            else if (lastComma > lastDot)
+            {
+                // Brazilian format: ',' is the decimal separator and '.' is the thousand separator.
+                normalized = s.Replace(".", string.Empty).Replace(",", ".");
+            }
+            else
+            {
+                // US format: '.' is the decimal separator and ',' is the thousand separator.
+                normalized = s.Replace(",", string.Empty);
+            }
+
+            return decimal.Parse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
