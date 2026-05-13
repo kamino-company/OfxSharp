@@ -178,6 +178,8 @@ namespace OfxSharpLib
             if (file.IndexOf("<BANKMSGSRSV1>", StringComparison.Ordinal) != -1)
                 return AccountType.Bank;
 
+            // Note: BANKMSGSRQV1 (request variant) is not supported — only response (BANKMSGSRSV1) is recognized.
+            // Known affected banks: none identified yet. If a bank sends BANKMSGSRQV1, this throws.
             throw new OfxException("Unsupported Account Type");
         }
 
