@@ -17,7 +17,8 @@ namespace OfxSharpLib
 
         public SignOn(XmlNode node)
         {
-            StatusCode = Convert.ToInt32(node.GetValue("//CODE"));
+            int.TryParse(node.GetValue("//CODE"), out var code);
+            StatusCode = code;
             StatusSeverity = node.GetValue("//SEVERITY");
             DtServer = node.GetValue("//DTSERVER").ToDate();
             Language = node.GetValue("//LANGUAGE");

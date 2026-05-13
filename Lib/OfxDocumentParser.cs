@@ -58,10 +58,10 @@ namespace OfxSharpLib
                 ofx.Currency = "BRL"; // default :)
             }
 
-            //Get sign on node from OFX file
-            var signOnNode = doc.SelectSingleNode(Resources.SignOn);
+            // SulCredi (273) emite SIGNONMSGSRQV1/SONRQ em vez de SIGNONMSGSRSV1/SONRS — N3-5922
+            var signOnNode = doc.SelectSingleNode(Resources.SignOn)
+                ?? doc.SelectSingleNode(Resources.SignOnRequest);
 
-            //If exists, populate signon obj, else throw parse error
             if (signOnNode != null)
             {
                 ofx.SignOn = new SignOn(signOnNode);
@@ -134,8 +134,6 @@ namespace OfxSharpLib
                     return xpath;
                 case OfxSection.Transactions:
                     return xpath + "/BANKTRANLIST";
-                case OfxSection.Signon:
-                    return Resources.SignOn;
                 case OfxSection.Currency:
                     return xpath + "/CURDEF";
                 default:
@@ -180,6 +178,8 @@ namespace OfxSharpLib
             if (file.IndexOf("<BANKMSGSRSV1>", StringComparison.Ordinal) != -1)
                 return AccountType.Bank;
 
+            // Note: BANKMSGSRQV1 (request variant) is not supported — only response (BANKMSGSRSV1) is recognized.
+            // Known affected banks: none identified yet. If a bank sends BANKMSGSRQV1, this throws.
             throw new OfxException("Unsupported Account Type");
         }
 

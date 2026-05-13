@@ -52,6 +52,69 @@ namespace OFXSharp.Tests
         }
 
         [Test]
+        public void CanParseOfxWithSignOnRequestVariant()
+        {
+            var parser = new OfxDocumentParser();
+            using var stream = new FileStream(@"sulcredi-signon-request.ofx", FileMode.Open);
+            var ofxDocument = parser.Import(stream);
+
+            Assert.IsNotNull(ofxDocument);
+            Assert.IsNotNull(ofxDocument.SignOn);
+            Assert.AreEqual(0, ofxDocument.SignOn.StatusCode);
+            Assert.AreEqual("POR", ofxDocument.SignOn.Language);
+            Assert.AreEqual(new System.DateTime(2026, 5, 1), ofxDocument.SignOn.DtServer);
+            Assert.AreEqual("273", ofxDocument.Account.BankId);
+            Assert.AreEqual("12345-6", ofxDocument.Account.AccountId);
+            Assert.AreEqual(2, ofxDocument.Transactions.Count());
+            Assert.AreEqual(1500m, ofxDocument.Transactions.First().Amount);
+            Assert.AreEqual(-250m, ofxDocument.Transactions.Last().Amount);
+        }
+
+        [Test]
+        public void SonrsTakesPrecedenceOverSonrq()
+        {
+            // When both SONRS and SONRQ are present, SONRS (response) wins via ?? operator
+            const string ofxXml = @"<OFX>
+  <SIGNONMSGSRSV1><SONRS>
+    <STATUS><CODE>1</CODE><SEVERITY>INFO</SEVERITY></STATUS>
+    <DTSERVER>20260501120000</DTSERVER><LANGUAGE>ENG</LANGUAGE>
+  </SONRS></SIGNONMSGSRSV1>
+  <SIGNONMSGSRQV1><SONRQ>
+    <STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>
+    <DTSERVER>20260501120000</DTSERVER><LANGUAGE>POR</LANGUAGE>
+  </SONRQ></SIGNONMSGSRQV1>
+  <BANKMSGSRSV1><STMTTRNRS><TRNUID>1</TRNUID>
+    <STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>
+    <STMTRS><CURDEF>BRL</CURDEF>
+      <BANKACCTFROM><BANKID>999</BANKID><ACCTID>12345</ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM>
+      <BANKTRANLIST><DTSTART>20260401</DTSTART><DTEND>20260430</DTEND></BANKTRANLIST>
+      <LEDGERBAL><BALAMT>1000.00</BALAMT><DTASOF>20260430</DTASOF></LEDGERBAL>
+    </STMTRS></STMTTRNRS></BANKMSGSRSV1>
+</OFX>";
+            var parser = new OfxDocumentParser();
+            var ofxDocument = parser.Import(ofxXml);
+
+            Assert.AreEqual(1, ofxDocument.SignOn.StatusCode);
+            Assert.AreEqual("ENG", ofxDocument.SignOn.Language);
+        }
+
+        [Test]
+        public void ThrowsWhenSignOnNotPresent()
+        {
+            const string ofxXml = @"<OFX>
+  <BANKMSGSRSV1><STMTTRNRS><TRNUID>1</TRNUID>
+    <STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>
+    <STMTRS><CURDEF>BRL</CURDEF>
+      <BANKACCTFROM><BANKID>999</BANKID><ACCTID>12345</ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM>
+      <BANKTRANLIST><DTSTART>20260401</DTSTART><DTEND>20260430</DTEND></BANKTRANLIST>
+      <LEDGERBAL><BALAMT>1000.00</BALAMT><DTASOF>20260430</DTASOF></LEDGERBAL>
+    </STMTRS></STMTTRNRS></BANKMSGSRSV1>
+</OFX>";
+            var parser = new OfxDocumentParser();
+            Assert.Throws<OfxParseException>(() => parser.Import(ofxXml));
+        }
+
+        [Test]
         public void CanParseBancoDoBrasil()
         {
             var parser = new OfxDocumentParser();

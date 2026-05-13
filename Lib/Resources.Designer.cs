@@ -113,5 +113,14 @@ namespace OfxSharpLib {
                 return ResourceManager.GetString("SignOn", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Consulta uma cadeia de caracteres localizada semelhante a OFX/SIGNONMSGSRQV1/SONRQ.
+        /// </summary>
+        internal static string SignOnRequest {
+            get {
+                return ResourceManager.GetString("SignOnRequest", resourceCulture);
+            }
+        }
     }
 }
