@@ -135,4 +135,7 @@
   <data name="SignOn" xml:space="preserve">
     <value>OFX/SIGNONMSGSRSV1/SONRS</value>
   </data>
+  <data name="SignOnRequest" xml:space="preserve">
+    <value>OFX/SIGNONMSGSRQV1/SONRQ</value>
+  </data>
 </root>

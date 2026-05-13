@@ -1,0 +1,61 @@
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+
+<OFX>
+    <SIGNONMSGSRQV1>
+        <SONRQ>
+            <STATUS>
+                <CODE>0
+                <SEVERITY>INFO
+            </STATUS>
+            <DTSERVER>20260501120000[-3:GMT]
+            <LANGUAGE>POR
+        </SONRQ>
+    </SIGNONMSGSRQV1>
+    <BANKMSGSRSV1>
+        <STMTTRNRS>
+            <TRNUID>1
+            <STATUS>
+                <CODE>0
+                <SEVERITY>INFO
+            </STATUS>
+            <STMTRS>
+                <CURDEF>BRL
+                <BANKACCTFROM>
+                    <BANKID>273
+                    <ACCTID>12345-6
+                    <ACCTTYPE>CHECKING
+                </BANKACCTFROM>
+                <BANKTRANLIST>
+                    <DTSTART>20260401120000[-3:GMT]
+                    <DTEND>20260430120000[-3:GMT]
+                    <STMTTRN>
+                        <TRNTYPE>CREDIT
+                        <DTPOSTED>20260415120000[-3:GMT]
+                        <TRNAMT>1500.00
+                        <FITID>20260415001
+                        <MEMO>TED RECEBIDA
+                    </STMTTRN>
+                    <STMTTRN>
+                        <TRNTYPE>DEBIT
+                        <DTPOSTED>20260420120000[-3:GMT]
+                        <TRNAMT>-250.00
+                        <FITID>20260420001
+                        <MEMO>PAGAMENTO BOLETO
+                    </STMTTRN>
+                </BANKTRANLIST>
+                <LEDGERBAL>
+                    <BALAMT>5000.00
+                    <DTASOF>20260430120000[-3:GMT]
+                </LEDGERBAL>
+            </STMTRS>
+        </STMTTRNRS>
+    </BANKMSGSRSV1>
+</OFX>

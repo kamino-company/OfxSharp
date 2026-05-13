@@ -58,10 +58,9 @@ namespace OfxSharpLib
                 ofx.Currency = "BRL"; // default :)
             }
 
-            //Get sign on node from OFX file
-            var signOnNode = doc.SelectSingleNode(Resources.SignOn);
+            var signOnNode = doc.SelectSingleNode(Resources.SignOn)
+                ?? doc.SelectSingleNode(Resources.SignOnRequest);
 
-            //If exists, populate signon obj, else throw parse error
             if (signOnNode != null)
             {
                 ofx.SignOn = new SignOn(signOnNode);

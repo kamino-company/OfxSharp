@@ -52,6 +52,20 @@ namespace OFXSharp.Tests
         }
 
         [Test]
+        public void CanParseOfxWithSignOnRequestVariant()
+        {
+            var parser = new OfxDocumentParser();
+            var ofxDocument = parser.Import(new FileStream(@"sulcredi-signon-request.ofx", FileMode.Open));
+
+            Assert.IsNotNull(ofxDocument);
+            Assert.IsNotNull(ofxDocument.SignOn);
+            Assert.AreEqual("273", ofxDocument.Account.BankId);
+            Assert.AreEqual("12345-6", ofxDocument.Account.AccountId);
+            Assert.AreEqual(2, ofxDocument.Transactions.Count());
+            Assert.AreEqual(1500m, ofxDocument.Transactions.First().Amount);
+        }
+
+        [Test]
         public void CanParseBancoDoBrasil()
         {
             var parser = new OfxDocumentParser();
