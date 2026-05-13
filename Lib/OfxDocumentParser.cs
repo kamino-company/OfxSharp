@@ -58,6 +58,7 @@ namespace OfxSharpLib
                 ofx.Currency = "BRL"; // default :)
             }
 
+            // SulCredi (273) emite SIGNONMSGSRQV1/SONRQ em vez de SIGNONMSGSRSV1/SONRS — N3-5922
             var signOnNode = doc.SelectSingleNode(Resources.SignOn)
                 ?? doc.SelectSingleNode(Resources.SignOnRequest);
 
@@ -133,8 +134,6 @@ namespace OfxSharpLib
                     return xpath;
                 case OfxSection.Transactions:
                     return xpath + "/BANKTRANLIST";
-                case OfxSection.Signon:
-                    return Resources.SignOn;
                 case OfxSection.Currency:
                     return xpath + "/CURDEF";
                 default:
